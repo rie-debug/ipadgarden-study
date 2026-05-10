@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>勉強会やります！申請 | iPad Garden</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#4a7c6e;--green-dark:#3a6358;--green-light:#e8f0ee;
+  --cream:#e8e4d8;--cream-dark:#d8d3c5;
+  --text:#2c2c2c;--text-sub:#5a5a5a;--text-light:#8a8a8a;
+  --border:rgba(0,0,0,0.12);--radius:12px;--radius-sm:8px;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+
+.header{background:var(--green);display:flex;align-items:center;overflow:hidden;min-height:110px;}
+.header-logo{height:110px;object-fit:contain;display:block;}
+.header-title{font-size:clamp(20px,5vw,34px);font-weight:700;color:white;letter-spacing:0.02em;padding:0 24px;}
+
+.container{max-width:600px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+
+.progress-wrap{height:5px;background:var(--cream-dark);border-radius:3px;margin-bottom:2rem;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.4s ease;}
+
+.step{display:none}.step.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.step-label{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+.question{font-size:20px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:.4rem;}
+.hint{font-size:13px;color:var(--text-sub);line-height:1.6;margin-bottom:1.5rem;}
+
+.radio-group{display:flex;flex-direction:column;gap:10px;}
+.rbtn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--radius);background:white;cursor:pointer;font-size:15px;font-family:'Noto Sans JP',sans-serif;color:var(--text);text-align:left;width:100%;transition:border-color .15s,background .15s;}
+.rbtn:hover{border-color:var(--green);background:var(--green-light);}
+.rbtn.sel{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.dot{width:20px;height:20px;border-radius:50%;border:1.5px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rbtn.sel .dot{border-color:var(--green);background:var(--green);}
+.rbtn.sel .dot::after{content:'';width:7px;height:7px;border-radius:50%;background:white;}
+
+input[type=text],input[type=datetime-local],textarea{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:'Noto Sans JP',sans-serif;color:var(--text);background:white;outline:none;transition:border-color .15s,box-shadow .15s;}
+input[type=text]:focus,input[type=datetime-local]:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(74,124,110,.12);}
+textarea{resize:vertical;min-height:110px;line-height:1.7;}
+
+.dt-row{display:flex;flex-direction:column;gap:10px;}
+.dt-item{display:flex;gap:8px;align-items:center;}
+.dt-item input{flex:1;}
+.dt-remove{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;font-size:13px;font-family:'Noto Sans JP',sans-serif;color:var(--text-light);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.dt-remove:hover{border-color:#e24b4a;color:#a32d2d;background:#fcebeb;}
+.dt-add{margin-top:10px;padding:10px 16px;border:1.5px dashed var(--green);border-radius:var(--radius-sm);background:transparent;font-size:13px;font-family:'Noto Sans JP',sans-serif;color:var(--green);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s;}
+.dt-add:hover{background:var(--green-light);}
+
+.navs{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;gap:12px;}
+.btn-back{padding:11px 22px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:var(--text-sub);cursor:pointer;transition:background .15s;}
+.btn-back:hover{background:var(--cream);}
+.btn-next{padding:11px 28px;border:none;border-radius:var(--radius-sm);background:var(--green);color:white;font-size:14px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:background .15s,transform .1s;margin-left:auto;}
+.btn-next:hover{background:var(--green-dark);}
+.btn-next:active{transform:scale(.97);}
+.btn-next:disabled{background:#bbb;cursor:not-allowed;}
+
+.alert-box{border:1.5px solid #a5c9bf;border-radius:var(--radius);background:var(--green-light);padding:1.5rem;}
+.alert-title{font-size:15px;font-weight:700;color:var(--green-dark);margin-bottom:.6rem;}
+.alert-body{font-size:13px;color:var(--green);line-height:1.7;margin-bottom:1rem;}
+.ex-box{background:white;border:1.5px solid #a5c9bf;border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:14px;color:var(--text);line-height:1.9;white-space:pre-wrap;}
+.copy-btn{margin-top:.75rem;padding:9px 18px;border:1.5px solid var(--green);border-radius:var(--radius-sm);background:white;color:var(--green-dark);font-size:13px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;}
+.copy-btn:hover{background:var(--green-light);}
+
+.preview-box{border:1.5px solid var(--border);border-radius:var(--radius);background:white;padding:1.5rem;font-size:14px;color:var(--text);line-height:2;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;}
+
+.canva-card{margin-top:1.25rem;border:1.5px solid #a5c9bf;border-radius:var(--radius);background:var(--green-light);padding:1.25rem 1.5rem;}
+.canva-title{font-size:14px;font-weight:700;color:var(--green-dark);margin-bottom:.4rem;}
+.canva-body{font-size:13px;color:var(--green);line-height:1.6;margin-bottom:.75rem;}
+.canva-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.canva-btn{padding:9px 16px;border:1.5px solid var(--green);border-radius:var(--radius-sm);background:white;font-size:13px;font-family:'Noto Sans JP',sans-serif;color:var(--green-dark);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;text-decoration:none;}
+.canva-btn:hover{background:var(--green-light);}
+
+.post-section{margin-top:1.25rem;background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;}
+.post-label{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:10px;}
+.server-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+.server-btn{padding:10px 18px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;font-size:13px;font-family:'Noto Sans JP',sans-serif;color:var(--text);cursor:pointer;transition:all .15s;}
+.server-btn:hover{border-color:var(--green);background:var(--green-light);}
+.server-btn.active{border-color:var(--green);background:var(--green);color:white;font-weight:700;}
+.btn-post{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);background:var(--green);color:white;font-size:15px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:background .15s,transform .1s;}
+.btn-post:hover{background:var(--green-dark);}
+.btn-post:active{transform:scale(.98);}
+.btn-post:disabled{background:#bbb;cursor:not-allowed;}
+.msg-ok{margin-top:.75rem;font-size:14px;color:var(--green-dark);font-weight:700;display:none;align-items:center;gap:6px;}
+.msg-err{margin-top:.75rem;font-size:13px;color:#a32d2d;display:none;}
+
+.done-box{text-align:center;padding:2.5rem 1rem;}
+.done-icon{font-size:52px;margin-bottom:1rem;}
+.done-title{font-size:22px;font-weight:700;color:var(--green-dark);margin-bottom:.5rem;}
+.done-body{font-size:14px;color:var(--text-sub);line-height:1.7;}
+.btn-reset{margin-top:1.5rem;padding:11px 28px;border:1.5px solid var(--green);border-radius:var(--radius-sm);background:white;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:var(--green-dark);cursor:pointer;transition:background .15s;}
+.btn-reset:hover{background:var(--green-light);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="header-logo" src="https://ipadgarden.fun/wp-content/uploads/2024/09/Garden_G_O_rec.png" alt="iPad Garden" onerror="this.style.display='none'">
+  <div class="header-title">勉強会やります！申請</div>
+</div>
+
+<div class="container">
+  <div class="progress-wrap"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+
+  <!-- Step 0 -->
+  <div class="step active" id="s0">
+    <div class="step-label">はじめに</div>
+    <div class="question">勉強会の日程は、運営に事前確認しましたか？</div>
+    <div class="hint">サポートの都合上、日程は運営との確認が必要です。</div>
+    <div class="radio-group" id="rg0">
+      <button class="rbtn" data-val="yes"><span class="dot"></span>はい、確認しました</button>
+      <button class="rbtn" data-val="no"><span class="dot"></span>いいえ、まだです</button>
+    </div>
+    <div class="navs"><button class="btn-next" id="n0" disabled>次へ →</button></div>
+  </div>
+
+  <!-- Step 0b いいえ -->
+  <div class="step" id="s0b">
+    <div class="step-label">まず運営に確認を！</div>
+    <div class="question">先生専用チャンネルに投稿してね 🌿</div>
+    <div class="hint">下の例文をコピーして「先生専用」チャンネルに投稿してください。<br>日程が決まったらまた戻ってきてね！</div>
+    <div class="alert-box">
+      <div class="alert-title">📋 投稿例文</div>
+      <div class="alert-body">以下をコピーして「先生専用」チャンネルに投稿してください👇</div>
+      <div class="ex-box" id="ex-text">勉強会の開催を考えています！
+
+📅 希望日時①：〇月〇日（〇）〇〇:〇〇ごろ
+📅 希望日時②：〇月〇日（〇）〇〇:〇〇ごろ
+📅 希望日時③：〇月〇日（〇）〇〇:〇〇ごろ
+📚 予定内容：〇〇アプリを使った〇〇講座を予定しています
+
+サポートしてくれる方はいらっしゃいますか？
+ご都合のよい方がいれば、ぜひよろしくお願いします🙏</div>
+      <button class="copy-btn" id="ex-copy-btn">📋 例文をコピー</button>
+    </div>
+    <div class="navs"><button class="btn-back" id="back-0b">← 戻る</button></div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step" id="s1">
+    <div class="step-label">1 / 6</div>
+    <div class="question">あなたの名前（講師名）を教えてください</div>
+    <div class="hint">例：くろむ</div>
+    <input type="text" id="i-name" placeholder="講師名を入力してください">
+    <div class="navs">
+      <button class="btn-back" id="back-1">← 戻る</button>
+      <button class="btn-next" id="n1" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step" id="s2">
+    <div class="step-label">2 / 6</div>
+    <div class="question">勉強会のタイトルを教えてください</div>
+    <div class="hint">例：Procreateで描く！水彩風イラスト入門</div>
+    <input type="text" id="i-title" placeholder="勉強会名を入力してください">
+    <div class="navs">
+      <button class="btn-back" id="back-2">← 戻る</button>
+      <button class="btn-next" id="n2" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step" id="s3">
+    <div class="step-label">3 / 6</div>
+    <div class="question">開催日時を入力してください</div>
+    <div class="hint">時間は24時間表記で。候補が複数ある場合は追加できます。</div>
+    <div class="dt-row" id="dt-list">
+      <div class="dt-item">
+        <input type="datetime-local" class="dt-input">
+        <button class="dt-remove" style="display:none">削除</button>
+      </div>
+    </div>
+    <button class="dt-add" id="dt-add-btn">＋ 日時候補を追加</button>
+    <div class="navs">
+      <button class="btn-back" id="back-3">← 戻る</button>
+      <button class="btn-next" id="n3" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step" id="s4">
+    <div class="step-label">4 / 6</div>
+    <div class="question">使用するアプリ名を教えてください</div>
+    <div class="hint">例：Procreate / Canva / Adobe Fresco</div>
+    <input type="text" id="i-app" placeholder="アプリ名を入力してください">
+    <div class="navs">
+      <button class="btn-back" id="back-4">← 戻る</button>
+      <button class="btn-next" id="n4" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step" id="s5">
+    <div class="step-label">5 / 6</div>
+    <div class="question">勉強会の概要を書いてください</div>
+    <div class="hint">どんな内容か、対象者や雰囲気など自由に書いてね</div>
+    <textarea id="i-overview" placeholder="概要を入力してください"></textarea>
+    <div class="navs">
+      <button class="btn-back" id="back-5">← 戻る</button>
+      <button class="btn-next" id="n5" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step" id="s6">
+    <div class="step-label">6 / 6</div>
+    <div class="question">事前準備情報を教えてください</div>
+    <div class="hint">例：「〇〇アプリをインストールしておいてください」など。<br>なければ「特になし」と入力してください。</div>
+    <textarea id="i-prep" placeholder="事前準備情報を入力してください"></textarea>
+    <div class="navs">
+      <button class="btn-back" id="back-6">← 戻る</button>
+      <button class="btn-next" id="n6" disabled>確認する →</button>
+    </div>
+  </div>
+
+  <!-- Step 7 確認・投稿 -->
+  <div class="step" id="s7">
+    <div class="step-label">確認・投稿</div>
+    <div class="question">投稿内容を確認してください</div>
+    <div class="hint">内容を確認してDiscordに投稿してください。</div>
+    <div class="preview-box" id="preview"></div>
+
+    <div class="canva-card">
+      <div class="canva-title">🎨 サムネイルを作ろう！</div>
+      <div class="canva-body">テキストをコピーしてCanvaテンプレートに貼り付けてサムネイルを完成させてね。</div>
+      <div class="canva-btns">
+        <button class="canva-btn" id="canva-copy-btn">📋 テキストをコピー</button>
+        <a class="canva-btn" href="https://www.canva.com/design/DAG6XOa6KpI/Ib8aaojXWCZGQ3UYqSjd2w/view?utm_content=DAG6XOa6KpI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview" target="_blank">🔗 Canvaを開く</a>
+      </div>
+    </div>
+
+    <div class="post-section">
+      <div class="post-label">投稿先を選択してください</div>
+      <div class="server-btns">
+        <button class="server-btn active" id="btn-test" data-server="test">🧪 テスト（運営用）</button>
+        <button class="server-btn" id="btn-prod" data-server="prod">🌺 本番（iPad Garden）</button>
+      </div>
+      <button class="btn-post" id="post-btn">Discord に投稿する 🌸</button>
+      <div class="msg-ok" id="msg-ok">✅ Discordへの投稿が完了しました！</div>
+      <div class="msg-err" id="msg-err"></div>
+    </div>
+
+    <div class="navs" style="margin-top:1.5rem">
+      <button class="btn-back" id="back-7">← 修正する</button>
+      <button class="copy-btn" id="pv-copy-btn">📋 テキストをコピー</button>
+    </div>
+  </div>
+
+  <!-- Step 8 完了 -->
+  <div class="step" id="s8">
+    <div class="done-box">
+      <div class="done-icon">🌸</div>
+      <div class="done-title">申請が完了しました！</div>
+      <div class="done-body">Discordの先生専用チャンネルに投稿されました。<br>サムネイルの準備もお忘れなく✨</div>
+      <button class="btn-reset" id="reset-btn">新しく申請する</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var r0val = null;
+var selectedServer = 'test';
+
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('s' + id).classList.add('active');
+  var n = (id === '0b') ? 0 : parseInt(id);
+  var pct = (n <= 0) ? 0 : Math.round(Math.min(n, 6) / 6 * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  if (id === '7') buildPreview();
+  window.scrollTo(0, 0);
+}
+
+function fmtDt(v) {
+  if (!v) return '';
+  var d = new Date(v);
+  var w = ['日','月','火','水','木','金','土'][d.getDay()];
+  return d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + '（' + w + '）' + ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+}
+
+function getDates() {
+  var vals = [];
+  document.querySelectorAll('.dt-input').forEach(function(i){ if (i.value.trim()) vals.push(i.value.trim()); });
+  if (!vals.length) return '';
+  if (vals.length === 1) return fmtDt(vals[0]);
+  return vals.map(function(v,i){ return '候補'+(i+1)+'：'+fmtDt(v); }).join('\n');
+}
+
+function buildPreview() {
+  var name  = document.getElementById('i-name').value.trim();
+  var title = document.getElementById('i-title').value.trim();
+  var dates = getDates();
+  var app   = document.getElementById('i-app').value.trim();
+  var ov    = document.getElementById('i-overview').value.trim();
+  var prep  = document.getElementById('i-prep').value.trim();
+  var txt =
+    '勉強会開催の申請がありました。\n\n' +
+    '🌸講　師　名：' + name  + '\n' +
+    '🌸勉 強 会 名：' + title + '\n' +
+    '🌸希 望 日 時：' + dates + '\n' +
+    '🌸ア プ リ 名：' + app   + '\n' +
+    '🌸勉強会　概要：\n' + ov + '\n' +
+    '🌸事前準備情報：' + prep;
+  document.getElementById('preview').textContent = txt;
+  return txt;
+}
+
+function doCopy(text, btnId, orig) {
+  navigator.clipboard.writeText(text).then(function(){
+    var btn = document.getElementById(btnId);
+    btn.textContent = '✅ コピーしました！';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  }).catch(function(){ alert('コピーに失敗しました。手動でコピーしてください。'); });
+}
+
+function chkDt() {
+  var ok = false;
+  document.querySelectorAll('.dt-input').forEach(function(i){ if (i.value.trim()) ok = true; });
+  document.getElementById('n3').disabled = !ok;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+
+  // Step 0
+  document.getElementById('rg0').addEventListener('click', function(e){
+    var btn = e.target.closest('.rbtn');
+    if (!btn) return;
+    document.querySelectorAll('#rg0 .rbtn').forEach(function(b){ b.classList.remove('sel'); });
+    btn.classList.add('sel');
+    r0val = btn.dataset.val;
+    document.getElementById('n0').disabled = false;
+  });
+  document.getElementById('n0').addEventListener('click', function(){ showStep(r0val === 'yes' ? '1' : '0b'); });
+  document.getElementById('back-0b').addEventListener('click', function(){ showStep('0'); });
+  document.getElementById('ex-copy-btn').addEventListener('click', function(){
+    doCopy(document.getElementById('ex-text').textContent, 'ex-copy-btn', '📋 例文をコピー');
+  });
+
+  // Step 1
+  document.getElementById('i-name').addEventListener('input', function(){ document.getElementById('n1').disabled = !this.value.trim(); });
+  document.getElementById('back-1').addEventListener('click', function(){ showStep('0'); });
+  document.getElementById('n1').addEventListener('click', function(){ showStep('2'); });
+
+  // Step 2
+  document.getElementById('i-title').addEventListener('input', function(){ document.getElementById('n2').disabled = !this.value.trim(); });
+  document.getElementById('back-2').addEventListener('click', function(){ showStep('1'); });
+  document.getElementById('n2').addEventListener('click', function(){ showStep('3'); });
+
+  // Step 3
+  document.getElementById('dt-list').addEventListener('input', chkDt);
+  document.getElementById('dt-add-btn').addEventListener('click', function(){
+    var list = document.getElementById('dt-list');
+    var div = document.createElement('div');
+    div.className = 'dt-item';
+    var inp = document.createElement('input');
+    inp.type = 'datetime-local';
+    inp.className = 'dt-input';
+    inp.addEventListener('input', chkDt);
+    var rmBtn = document.createElement('button');
+    rmBtn.className = 'dt-remove';
+    rmBtn.textContent = '削除';
+    rmBtn.addEventListener('click', function(){
+      div.remove();
+      var items = document.querySelectorAll('.dt-item');
+      if (items.length === 1) items[0].querySelector('.dt-remove').style.display = 'none';
+      chkDt();
+    });
+    div.appendChild(inp);
+    div.appendChild(rmBtn);
+    list.appendChild(div);
+    document.querySelectorAll('.dt-remove').forEach(function(b){ b.style.display = 'inline-flex'; });
+  });
+  document.getElementById('back-3').addEventListener('click', function(){ showStep('2'); });
+  document.getElementById('n3').addEventListener('click', function(){ showStep('4'); });
+
+  // Step 4
+  document.getElementById('i-app').addEventListener('input', function(){ document.getElementById('n4').disabled = !this.value.trim(); });
+  document.getElementById('back-4').addEventListener('click', function(){ showStep('3'); });
+  document.getElementById('n4').addEventListener('click', function(){ showStep('5'); });
+
+  // Step 5
+  document.getElementById('i-overview').addEventListener('input', function(){ document.getElementById('n5').disabled = !this.value.trim(); });
+  document.getElementById('back-5').addEventListener('click', function(){ showStep('4'); });
+  document.getElementById('n5').addEventListener('click', function(){ showStep('6'); });
+
+  // Step 6
+  document.getElementById('i-prep').addEventListener('input', function(){ document.getElementById('n6').disabled = !this.value.trim(); });
+  document.getElementById('back-6').addEventListener('click', function(){ showStep('5'); });
+  document.getElementById('n6').addEventListener('click', function(){ showStep('7'); });
+
+  // Step 7
+  document.getElementById('back-7').addEventListener('click', function(){ showStep('6'); });
+  document.getElementById('pv-copy-btn').addEventListener('click', function(){
+    doCopy(document.getElementById('preview').textContent, 'pv-copy-btn', '📋 テキストをコピー');
+  });
+  document.getElementById('canva-copy-btn').addEventListener('click', function(){
+    var txt = '講師：' + document.getElementById('i-name').value.trim() + '\nタイトル：' + document.getElementById('i-title').value.trim() + '\n日時：' + getDates();
+    doCopy(txt, 'canva-copy-btn', '📋 テキストをコピー');
+  });
+
+  // サーバー切り替え
+  document.querySelectorAll('.server-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.server-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedServer = btn.dataset.server;
+      document.getElementById('msg-ok').style.display = 'none';
+      document.getElementById('msg-err').style.display = 'none';
+      document.getElementById('post-btn').disabled = false;
+      document.getElementById('post-btn').textContent = 'Discord に投稿する 🌸';
+    });
+  });
+
+  // Discord投稿（APIを経由）
+  document.getElementById('post-btn').addEventListener('click', function(){
+    var btn = document.getElementById('post-btn');
+    var errEl = document.getElementById('msg-err');
+    var okEl = document.getElementById('msg-ok');
+    btn.disabled = true;
+    btn.textContent = '投稿中...';
+    errEl.style.display = 'none';
+    okEl.style.display = 'none';
+
+    fetch('/api/post', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ content: buildPreview(), server: selectedServer })
+    }).then(function(res){ return res.json(); })
+    .then(function(data){
+      if (data.success) {
+        okEl.style.display = 'flex';
+        btn.textContent = '✅ 投稿済み';
+        setTimeout(function(){ showStep('8'); }, 1500);
+      } else {
+        throw new Error(data.error || '不明なエラー');
+      }
+    }).catch(function(e){
+      errEl.textContent = '投稿に失敗しました（' + e.message + '）。しばらくしてもう一度お試しください。';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Discord に投稿する 🌸';
+    });
+  });
+
+  // リセット
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    ['i-name','i-title','i-app','i-overview','i-prep'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('dt-list').innerHTML = '<div class="dt-item"><input type="datetime-local" class="dt-input"><button class="dt-remove" style="display:none">削除</button></div>';
+    document.getElementById('dt-list').addEventListener('input', chkDt);
+    r0val = null;
+    document.querySelectorAll('#rg0 .rbtn').forEach(function(b){ b.classList.remove('sel'); });
+    document.getElementById('n0').disabled = true;
+    selectedServer = 'test';
+    document.querySelectorAll('.server-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('btn-test').classList.add('active');
+    document.getElementById('msg-ok').style.display = 'none';
+    document.getElementById('msg-err').style.display = 'none';
+    document.getElementById('post-btn').disabled = false;
+    document.getElementById('post-btn').textContent = 'Discord に投稿する 🌸';
+    showStep('0');
+  });
+
+});
+</script>
+</body>
+</html>
